@@ -4,7 +4,7 @@
 #include <AnalogMotorDriver.h>
 
 template<AnalogMotorConcept MD>
-class MecanumDriver {
+class SimpleMecanumDriver {
 private:
   enum ID { ID_FL, ID_FR, ID_BL, ID_BR, ID_ALL };
   MD motors_[ID::ID_ALL];
@@ -13,11 +13,10 @@ private:
   float rotation_
 
 public:
-  MecanumDriver(MD &&mtFL, MD &&mtFR, MD &&mtBL, MD &&mtBR,
-                      const float (&speed_ratio)[ID::ID_ALL],
-                      Vector2D<float> &&init_velocity = Vector2D<float>(0, 0))
+  SimpleMecanumDriver(MD &&mtFL, MD &&mtFR, MD &&mtBL, MD &&mtBR,
+                      const float (&speed_ratio)[ID::ID_ALL])
     : motors{ std::move(mtFL), std::move(mtFR), std::move(mtBL), std::move(mtBR) },
-      speed_ratio{ speed_ratio }, _velocity{ std::move(init_velocity) } {}
+      speed_ratio{ speed_ratio }, _velocity{ Vector2D<float>(0, 0) }, rotation(0) {}
 
   void begin() {
     for (auto &this->motor_ : motors) {
@@ -34,11 +33,11 @@ public:
     this->motors[ID::ID_BR].write((vy + vx - this->rotation_) * this->speed_ratio[ID::ID_BR]);
   }
 
-  void setVelocity(const Vector2D<float> &velocity, float rotation) {
+  void setVelocity(const Vector2D<float> &velocity, float rotation = 0) {
     this->velocity_ = velocity;
     this->rotation_ = rotation;
   }
-  void setVelocity(Vector2D<float> &&velocity) {
+  void setVelocity(Vector2D<float> &&velocity, float rotation = 0) {
     this->velocity_ = std::move(velocity);
     this->rotation_ = rotation;
   }
