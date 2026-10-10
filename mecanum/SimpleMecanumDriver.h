@@ -2,10 +2,9 @@
 #include <Arduino.h>
 #include <Vector2D.h>
 #include <AnalogMotorDriver.h>
-#include <AccleMotorDriver.h>
 
-template<AnalogMotorConcept MD = AccelMotor>
-class SimpleMecanumDriver {
+template<AnalogMotorConcept MD>
+class MecanumDriver {
 private:
   enum ID { ID_FL, ID_FR, ID_BL, ID_BR, ID_ALL };
   MD motors_[ID::ID_ALL];
@@ -14,7 +13,7 @@ private:
   float rotation_
 
 public:
-  SimpleMecanumDriver(MD &&mtFL, MD &&mtFR, MD &&mtBL, MD &&mtBR,
+  MecanumDriver(MD &&mtFL, MD &&mtFR, MD &&mtBL, MD &&mtBR,
                       const float (&speed_ratio)[ID::ID_ALL],
                       Vector2D<float> &&init_velocity = Vector2D<float>(0, 0))
     : motors{ std::move(mtFL), std::move(mtFR), std::move(mtBL), std::move(mtBR) },
