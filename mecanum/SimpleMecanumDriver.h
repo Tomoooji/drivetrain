@@ -4,24 +4,27 @@
 #include <Vector2D.h>
 #include <AnalogMotorDriver.h>
 
-template<AnalogMotorConcept MD>
-requires requires(MD m) { m.begin(); }
+#if __cplusplus >= 202002L
+template <AnalogMotorConcept MD>
+  requires requires(MD m) { m.begin(); }
+#else
+template <class MD>
+#endif
 class SimpleMecanumDriver {
 private:
   enum ID { ID_FL, ID_FR, ID_BL, ID_BR, ID_ALL };
   MD motors_[ID::ID_ALL];
   const float (&speed_ratio_)[ID::ID_ALL];
   Vector2D<float> velocity_;
-  float rotation_
+float rotation_;
 
-public:
-  SimpleMecanumDriver(MD &&mtFL, MD &&mtFR, MD &&mtBL, MD &&mtBR,
-                      const float (&speed_ratio)[ID::ID_ALL])
-    : motors_{ std::move(mtFL), std::move(mtFR), std::move(mtBL), std::move(mtBR) },
-      speed_ratio_{ speed_ratio }, velocity_{ Vector2D<float>(0, 0) }, rotation_(0) {}
+    public : SimpleMecanumDriver(MD &&mtFL, MD &&mtFR, MD &&mtBL, MD &&mtBR,
+                                 const float (&speed_ratio)[ID::ID_ALL])
+    : motors_{std::move(mtFL), std::move(mtFR), std::move(mtBL), std::move(mtBR)},
+      speed_ratio_{speed_ratio}, velocity_{Vector2D<float>(0, 0)}, rotation_(0) {}
 
   void begin() {
-    for (auto& motor : motors_) {
+    for (auto &motor : motors_) {
       motor.begin();
     }
   }
@@ -44,9 +47,8 @@ public:
     this->rotation_ = rotation;
   }
   const Vector2D<float> &getVelocity() const { return this->velocity_; }
-  
+
   const float &getRotation() const { return this->rotation_; }
 };
 
-template<class MD>
-using SimpleOmuni4Driver = SimpleMecanumDriver<MD>;
+template <class MD> using SimpleOmuni4Driver = SimpleMecanumDriver<MD>;

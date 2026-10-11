@@ -2,7 +2,7 @@
 #include <Arduino.h>
 
 template <typename T = float>
-class PID {
+class SimplePID {
 public:
   struct Gain {
     T kp;
@@ -19,7 +19,7 @@ private:
   unsigned long last_time;
 
 public:
-  PID(const Gain &gain, const T &integral_limit)
+  SimplePID(const Gain &gain, const T &integral_limit)
       : gain(gain), integral_limit(integral_limit), target(0), integral(0),
         last_error(0), last_time(millis()) {}
 
