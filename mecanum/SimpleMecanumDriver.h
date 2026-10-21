@@ -1,8 +1,8 @@
 #pragma once
 #include <utility>
 #include <Arduino.h>
-#include <Vector2D.h>
-#include <AnalogMotorDriver.h>
+#include "src\mathmatics\src\Vector2D.h"
+#include "src\MotorDriver\src\AnalogMotorDriver.h"
 
 #if __cplusplus >= 202002L
 template <AnalogMotorConcept MD>
@@ -16,15 +16,17 @@ private:
   MD motors_[ID::ID_ALL];
   const float (&speed_ratio_)[ID::ID_ALL];
   Vector2D<float> velocity_;
-float rotation_;
+  float rotation_;
 
-    public : SimpleMecanumDriver(MD &&mtFL, MD &&mtFR, MD &&mtBL, MD &&mtBR,
-                                 const float (&speed_ratio)[ID::ID_ALL])
-    : motors_{std::move(mtFL), std::move(mtFR), std::move(mtBL), std::move(mtBR)},
-      speed_ratio_{speed_ratio}, velocity_{Vector2D<float>(0, 0)}, rotation_(0) {}
+public:
+  SimpleMecanumDriver(MD &&mtFL, MD &&mtFR, MD &&mtBL, MD &&mtBR,
+                      const float (&speed_ratio)[ID::ID_ALL],
+                      Vector2D<float> &&init_velocity = Vector2D<float>(0, 0))
+    : motors_{ std::move(mtFL), std::move(mtFR), std::move(mtBL), std::move(mtBR) },
+      speed_ratio_{ speed_ratio }, velocity_{ std::move(init_velocity) }, rotation_{ 0.0f } {}
 
   void begin() {
-    for (auto &motor : motors_) {
+    for (auto &motor : this->motors_) {
       motor.begin();
     }
   }
@@ -38,17 +40,17 @@ float rotation_;
     this->motors_[ID::ID_BR].write((vy + vx - this->rotation_) * this->speed_ratio_[ID::ID_BR]);
   }
 
-  void setVelocity(const Vector2D<float> &velocity, float rotation = 0) {
+  void setVelocity(const Vector2D<float> &&velocity, float rotation) {
     this->velocity_ = velocity;
     this->rotation_ = rotation;
   }
-  void setVelocity(Vector2D<float> &&velocity, float rotation = 0) {
+  void setVelocity(Vector2D<float> &&velocity) {
     this->velocity_ = std::move(velocity);
-    this->rotation_ = rotation;
   }
   const Vector2D<float> &getVelocity() const { return this->velocity_; }
-
+  
   const float &getRotation() const { return this->rotation_; }
 };
 
-template <class MD> using SimpleOmuni4Driver = SimpleMecanumDriver<MD>;
+template<class MD>
+using SimpleOmuni4Driver = SimpleMecanumDrive
