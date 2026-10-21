@@ -11,6 +11,7 @@ constexpr uint8_t dc_omuni4_FL[] = { 19, 21 };
 constexpr uint8_t dc_omuni4_FR[] = { 27, 26 };
 constexpr uint8_t dc_omuni4_BR[] = { 33, 25 };
 constexpr uint8_t dc_omuni4_BL[] = { 16, 17 };
+constexpr uint8_t led_builtin = 2;
 }  // namespace Pins
 
 namespace Gains {
@@ -26,17 +27,42 @@ SimpleOmuni4Driver<AccelMotor> Omuni4{
   Gains::omuni4_speed_ratio
 };
 
-/// コントローラー回り ///
-
-//MAC ADDRESS for Controller
-static const char* ALLOWED_ADDR = "4C:B9:9B:42:AA:F9";
-//dualsence : 4C:B9:9B:42:AA:F9
-//genki ds4 : BC:C7:46:5B:49:0D
-//aimeiba ds4 : DC:0C:2D:16:0C:6A
-
 ControllerPtr myControllers[BP32_MAX_GAMEPADS];
 
-// コントローラー接続処理(流用)
+void setup() {
+  Serial.begin(115200);
+  Omuni4.begin();
+  pinMode(led_builtin, OUTPUT);
+  
+  BP32.enableVirtualDevice(false);
+  BP32.forgetBluetoothKeys();
+  BP32.setup(&onConnectedController, &onDisconnectedController);
+}
+
+
+void loop() {
+  ControllerPtr ctrl = findController();
+  digitalWrite(2, LOW);
+  if (ctrl != nullptr) {
+    digitalWrite(2, HIGH);
+    //dumpGamepad(ctrl);
+    Omuni4.setVelocity(
+      Vector2D<float>(ctrl->axisX() * 0.5, -ctrl->axisY() * 0.5),
+      (ctrl->throttle() - ctrl->brake()) / 8);
+  }// else {
+    //Omuni4.setVelocity(Vector2D<float>(0.0f, 0.0f), 0.0f);
+  //}
+  Omuni4.update();
+  delay(10);
+  Serial.print(Omuni4.getVelocity().X());
+  Serial.print(",");
+  Serial.print(Omuni4.getVelocity().Y());
+  Serial.print(",");
+  Serial.print(Omuni4.getRotation());
+  Serial.println();
+}
+
+// コントローラー接続処理
 void onConnectedController(ControllerPtr ctl) {
   bool foundEmptySlot = false;
   for (int i = 0; i < BP32_MAX_GAMEPADS; i++) {
@@ -56,7 +82,7 @@ void onConnectedController(ControllerPtr ctl) {
   }
 }
 
-//コントローラー接続解除処理(流用)
+//コントローラー接続解除処理
 void onDisconnectedController(ControllerPtr ctl) {
   bool foundController = false;
   for (int i = 0; i < BP32_MAX_GAMEPADS; i++) {
@@ -67,14 +93,12 @@ void onDisconnectedController(ControllerPtr ctl) {
       break;
     }
   }
-
   if (!foundController) {
     Serial.println("CALLBACK: Controller disconnected, but not found in myControllers");
   }
 }
 
-
-//デバッグ用(流用)
+//デバッグ用
 void dumpGamepad(ControllerPtr ctl) {
   Serial.printf(
     "idx=%d, dpad: 0x%02x, buttons: 0x%04x, axis L: %4d, %4d, axis R: %4d, %4d, brake: %4d, throttle: %4d, "
@@ -97,44 +121,4 @@ ControllerPtr findController() {
     }
   }
   return nullptr;
-}
-
-void setup() {
-  //Serial.begin(115200);
-  Omuni4.begin();
-
-  // コントローラー回り(ほぼ流用)
-  BP32.enableVirtualDevice(false);
-  BP32.forgetBluetoothKeys();
-  BP32.setup(&onConnectedController, &onDisconnectedController);
-
-  bd_addr_t controller_addr;
-  sscanf_bd_addr(ALLOWED_ADDR, controller_addr);
-  uni_bt_allowlist_add_addr(controller_addr);
-  uni_bt_allowlist_set_enabled(true);
-
-  pinMode(2, OUTPUT);
-}
-
-
-void loop() {
-  ControllerPtr ctrl = findController();
-  digitalWrite(2, LOW);
-  if (ctrl != nullptr) {
-    digitalWrite(2, HIGH);
-    //dumpGamepad(ctrl);
-    Omuni4.setVelocity(
-      Vector2D<float>(ctrl->axisX() * 0.5, -ctrl->axisY() * 0.5),
-      (ctrl->throttle() - ctrl->brake()) / 8);
-  }// else {
-    //Omuni4.setVelocity(Vector2D<float>(0.0f, 0.0f), 0.0f);
-  //}
-  Omuni4.update();
-  //delay(10);
-  Serial.print(Omuni4.getVelocity().X());
-  Serial.print(",");
-  Serial.print(Omuni4.getVelocity().Y());
-  Serial.print(",");
-  Serial.print(Omuni4.getRotation());
-  Serial.println();
 }
