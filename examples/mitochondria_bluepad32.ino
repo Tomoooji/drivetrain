@@ -3,8 +3,8 @@
 
 #include "SimpleMecanumDriver.h"
 
-#include "src\MotorDriver\src\AccelMotorDriver.h"
-#include "src\mathmatics\src\Vector2D.h"
+#include <AccelMotorDriver.h>
+#include <Vector2D.h>
 
 namespace Pins {
 constexpr uint8_t dc_omuni4_FL[] = { 19, 21 };
