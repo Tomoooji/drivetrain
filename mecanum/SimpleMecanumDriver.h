@@ -1,8 +1,8 @@
 #pragma once
 #include <utility>
 #include <Arduino.h>
-#include "src\mathmatics\src\Vector2D.h"
-#include "src\MotorDriver\src\AnalogMotorDriver.h"
+#include <Vector2D.h>
+#include <AnalogMotorDriver.h>
 
 #if __cplusplus >= 202002L
 template <AnalogMotorConcept MD>
@@ -53,4 +53,4 @@ public:
 };
 
 template<class MD>
-using SimpleOmuni4Driver = SimpleMecanumDrive
+using SimpleOmuni4Driver = SimpleMecanumDriver<MD>
