@@ -41,7 +41,7 @@ public:
   }
 
   void setVelocity(const Vector2D<float> &&velocity, float rotation) {
-    this->velocity_ = velocity;
+    this->velocity_ = std::move(velocity);
     this->rotation_ = rotation;
   }
   void setVelocity(Vector2D<float> &&velocity) {
