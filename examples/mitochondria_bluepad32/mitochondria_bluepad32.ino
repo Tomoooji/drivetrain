@@ -1,10 +1,9 @@
 #include <BluePad32.h>
 #include <uni.h>
 
-#include "SimpleMecanumDriver.h"
-
+// BluePad32内部のArduino Coreの影響でパスに日本語が入るとコンパイルエラーになる
+#include <SimpleMecanumDriver.h>
 #include <AccelMotorDriver.h>
-#include <Vector2D.h>
 
 namespace Pins {
 constexpr uint8_t dc_omuni4_FL[] = { 19, 21 };
@@ -32,7 +31,7 @@ ControllerPtr myControllers[BP32_MAX_GAMEPADS];
 void setup() {
   Serial.begin(115200);
   Omuni4.begin();
-  pinMode(led_builtin, OUTPUT);
+  pinMode(Pins::led_builtin, OUTPUT);
   
   BP32.enableVirtualDevice(false);
   BP32.forgetBluetoothKeys();
@@ -41,17 +40,22 @@ void setup() {
 
 
 void loop() {
+  static int timeout_count = 0;
+  digitalWrite(Pins::led_builtin, LOW);
   ControllerPtr ctrl = findController();
-  digitalWrite(2, LOW);
   if (ctrl != nullptr) {
-    digitalWrite(2, HIGH);
+    timeout_count = 0;
+    digitalWrite(Pins::led_builtin, HIGH);
     //dumpGamepad(ctrl);
     Omuni4.setVelocity(
       Vector2D<float>(ctrl->axisX() * 0.5, -ctrl->axisY() * 0.5),
       (ctrl->throttle() - ctrl->brake()) / 8);
-  }// else {
-    //Omuni4.setVelocity(Vector2D<float>(0.0f, 0.0f), 0.0f);
-  //}
+  } else {
+    timeout_count++;
+    if (timeout_count > 100) {
+      Omuni4.setVelocity(Vector2D<float>(0.0f, 0.0f), 0.0f);
+    }
+  }
   Omuni4.update();
   delay(10);
   Serial.print(Omuni4.getVelocity().X());
