@@ -40,11 +40,11 @@ public:
     this->motors_[ID::ID_BR].write((vy + vx - this->rotation_) * this->speed_ratio_[ID::ID_BR]);
   }
 
-  void setVelocity(const Vector2D<float> &&velocity, float rotation) {
+  void setVelocity(const Vector2D<float> velocity, float rotation) {
     this->velocity_ = std::move(velocity);
     this->rotation_ = rotation;
   }
-  void setVelocity(Vector2D<float> &&velocity) {
+  void setVelocity(Vector2D<float> velocity) {
     this->velocity_ = std::move(velocity);
   }
   const Vector2D<float> &getVelocity() const { return this->velocity_; }
