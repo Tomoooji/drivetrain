@@ -1,0 +1,6 @@
+[submodule "lib/MotorDriver"]
+	path = lib/MotorDriver
+	url = https://github.com/Tomoooji/MotorDriver
+[submodule "lib/Mathmatics"]
+	path = lib/Mathmatics
+	url = https://github.com/Tomoooji/mathmatics_tmj
