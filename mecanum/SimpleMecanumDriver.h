@@ -53,4 +53,4 @@ public:
 };
 
 template<class MD>
-using SimpleOmuni4Driver = SimpleMecanumDriver<MD>
+using SimpleOmuni4Driver = SimpleMecanumDriver<MD>;
